@@ -1,0 +1,91 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "VirtualSpace AppSec",
+          "version": "3.2.0",
+          "informationUri": "https://virtualspacesec.com",
+          "rules": [
+            {
+              "id": "VS-PY-502-PICKLE",
+              "name": "InsecureDeserialization",
+              "shortDescription": {"text": "Deserialization of untrusted data via pickle"},
+              "defaultConfiguration": {"level": "error"}
+            },
+            {
+              "id": "VS-PY-89-SQLI",
+              "name": "SqlInjection",
+              "shortDescription": {"text": "SQL injection via string concatenation"},
+              "defaultConfiguration": {"level": "error"}
+            },
+            {
+              "id": "VS-PY-327-MD5",
+              "name": "WeakHash",
+              "shortDescription": {"text": "MD5 used as a security primitive"},
+              "defaultConfiguration": {"level": "warning"}
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "VS-PY-502-PICKLE",
+          "level": "error",
+          "message": {"text": "pickle.load on attacker-controllable input"},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "src/loader.py"},
+                "region": {
+                  "startLine": 42,
+                  "startColumn": 5,
+                  "snippet": {"text": "return pickle.load(f)"}
+                }
+              }
+            }
+          ],
+          "properties": {"cwe": ["CWE-502"]}
+        },
+        {
+          "ruleId": "VS-PY-89-SQLI",
+          "level": "error",
+          "message": {"text": "User input concatenated into SQL query"},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "src/users.py"},
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 9,
+                  "snippet": {"text": "cur.execute(f\"... WHERE email = '{email}'\")"}
+                }
+              }
+            }
+          ],
+          "properties": {"cwe": ["CWE-89"]}
+        },
+        {
+          "ruleId": "VS-PY-327-MD5",
+          "level": "warning",
+          "message": {"text": "MD5 used for password storage"},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "src/auth.py"},
+                "region": {
+                  "startLine": 7,
+                  "startColumn": 12,
+                  "snippet": {"text": "return hashlib.md5(password.encode()).hexdigest()"}
+                }
+              }
+            }
+          ],
+          "properties": {"cwe": ["CWE-327", "CWE-916"]}
+        }
+      ]
+    }
+  ]
+}
