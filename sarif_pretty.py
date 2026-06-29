@@ -188,6 +188,24 @@ def render_json(findings: Sequence[Finding]) -> str:
 
 # --- CLI --------------------------------------------------------------------
 
+def _stdout_supports_ansi() -> bool:
+    """Best-effort check that stdout can render ANSI escape sequences.
+
+    On POSIX shells we trust an attached TTY. On Windows we additionally
+    require one of: TERM, WT_SESSION (Windows Terminal) or ANSICON, since
+    legacy cmd.exe hosts may strip escapes even when isatty() is true.
+    """
+    if not sys.stdout.isatty():
+        return False
+    if os.name != "nt":
+        return True
+    return bool(
+        os.environ.get("TERM")
+        or os.environ.get("WT_SESSION")
+        or os.environ.get("ANSICON")
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     p = argparse.ArgumentParser(
         prog="sarif-pretty",
@@ -230,8 +248,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     use_color = (
         (not args.no_color)
         and not os.environ.get("NO_COLOR")
-        and sys.stdout.isatty()
-        and (os.name != "nt" or os.environ.get("TERM") not in (None, ""))
+        and _stdout_supports_ansi()
     )
     if args.format == "ansi":
         print(render_ansi(findings, use_color))
