@@ -229,6 +229,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     use_color = (
         (not args.no_color)
+        and not os.environ.get("NO_COLOR")
         and sys.stdout.isatty()
         and (os.name != "nt" or os.environ.get("TERM") not in (None, ""))
     )
